@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Security;
 
 namespace Solution;
 
@@ -43,10 +44,21 @@ public class SinglyLinkedList<T> : ILinkedList<T> where T : IComparable<T>
 
     public bool Remove(T value)
     {
-        SingleNode<T>? current = Head;
-        while (current.Next != null || current.Next.Value.CompareTo(value) <= 0)
+        if (Head == null)
         {
-            if (current.Value.CompareTo(value) == 0)
+            return false;
+        }
+
+        if (Head.Value.CompareTo(value) == 0)
+        {
+            Head = Head.Next;
+            return true;
+        }
+
+        SingleNode<T> current = Head;
+        while (current.Next != null)
+        {
+            if (current.Next.Value.CompareTo(value) == 0)
             {
                 current.Next = current.Next.Next;
                 return true;
@@ -56,7 +68,6 @@ public class SinglyLinkedList<T> : ILinkedList<T> where T : IComparable<T>
         }
 
         return false;
-
     }
 
     public SingleNode<T>? Search(T value)
@@ -73,15 +84,24 @@ public class SinglyLinkedList<T> : ILinkedList<T> where T : IComparable<T>
     public bool Contains(T value) => Search(value) != null;
 
     public void AddSorted(T value)
+{
+    SingleNode<T> newNode = new SingleNode<T>(value);
+    if (Head == null || Head.Value.CompareTo(value) >= 0)
     {
-        SingleNode<T>? current = Head;
-        while (current.Next != null || current.Next.Value.CompareTo(value) <= 0)
+        newNode.Next = Head;
+        Head = newNode;
+    }
+    else
+    {
+        SingleNode<T> current = Head;
+        while (current.Next != null && current.Next.Value.CompareTo(value) < 0)
         {
             current = current.Next;
         }
-
-        current.Next = new SingleNode<T>(value, current.Next);
+        newNode.Next = current.Next;
+        current.Next = newNode;
     }
+}
 
     public void Clear()
     {

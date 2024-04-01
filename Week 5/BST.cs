@@ -1,4 +1,6 @@
 ﻿
+using System.Security.Cryptography;
+
 namespace Solution;
 
 public class BST<T> : IBST<T> where T : IComparable<T>
@@ -31,7 +33,7 @@ public class BST<T> : IBST<T> where T : IComparable<T>
                     return;
                 }
             }
-            else
+            else if (value.CompareTo(current.Value) > 0)
             {
                 current = current.Right;
                 if (current == null)
@@ -39,6 +41,11 @@ public class BST<T> : IBST<T> where T : IComparable<T>
                     parent.Right = newNode;
                     return;
                 }
+            }
+            else
+            {
+                // Ignore duplicates
+                return;
             }
         }
     }
@@ -80,7 +87,9 @@ public class BST<T> : IBST<T> where T : IComparable<T>
     {
         return string.Empty;
     }
-    return PreOrderTraversal(currNode.Left) + " " + PreOrderTraversal(currNode.Right) + " " + currNode.Value.ToString();
+    // Assuming `values` is a List<string> that contains your values
+    string actual = string.Join(" ", currNode).Trim();
+    return actual;
 }
 
     public string InOrderTraversal() => InOrderTraversal(Root);
@@ -113,10 +122,9 @@ public class BST<T> : IBST<T> where T : IComparable<T>
     {
         return null;
     }
-
     if (value.CompareTo(node.Value) == 0)
     {
-        return node;
+        return null; // Return null instead of the node itself to exclude duplicate values
     }
     else if (value.CompareTo(node.Value) < 0)
     {
