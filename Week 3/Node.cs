@@ -1,13 +1,14 @@
-﻿// class for a Single Linked List Node
-public class SingleNode<T> where T : IComparable<T>
+﻿// class for a Double Linked List Node
+public class DoubleNode<T> where T : IComparable<T>
 {
     public T Value { get; private set; }
-    public SingleNode<T>? Next { get; set; }
+    public DoubleNode<T>? Next { get; set; }
+    public DoubleNode<T>? Previous { get; set; }
 
-    public SingleNode(T value, SingleNode<T>? next = null)
+    public DoubleNode(T value, DoubleNode<T>? next = null, DoubleNode<T>? previous = null)
     {
         Value = value;
         Next = next;
+        Previous = previous;
     }
-
 }

@@ -29,17 +29,30 @@ public class HashTable<K, V> : IHashTable<K, V>
     }
 
     public bool Add(K key, V value)
+{
+    int index = getIndex(key);
+    int originalIndex = index;
+    int count = 0;
+    do
     {
-        int index = getIndex(key);
-        if (buckets[index] != null && buckets[index].Key.Equals(key)) return false;
-        if (buckets[index] == null)
+        if (buckets[index] == null || buckets[index].Key.Equals(key))
         {
-            buckets[index] = new Entry<K, V>(key, value);
+            buckets[index] = new Entry<K, V>(key,value);
             return true;
         }
+        count++;
+        index = (originalIndex + count * getSecondHash(key)) % buckets.Length;
+    } while (count < buckets.Length);
 
-        return default;
-    }
+    // The hashtable is full
+    return false;
+}
+
+protected int getSecondHash(K key)
+{
+    int hashCode = Math.Abs(key.GetHashCode());
+    return (hashCode % (buckets.Length - 1)) + 1;
+}
 
     public V? Find(K key)
     {

@@ -1,6 +1,4 @@
 ﻿
-using System.Security.Cryptography;
-
 namespace Solution;
 
 public class BST<T> : IBST<T> where T : IComparable<T>
@@ -9,8 +7,8 @@ public class BST<T> : IBST<T> where T : IComparable<T>
 
     public void Insert(T value) => Insert(value, Root);
     public void InsertIterative(T value)
-{
-    var newNode = new TreeNode<T>(value);
+    {
+        var newNode = new TreeNode<T>(value);
 
     if (Root == null)
     {
@@ -19,7 +17,7 @@ public class BST<T> : IBST<T> where T : IComparable<T>
     else
     {
         TreeNode<T> current = Root;
-        TreeNode<T> parent = null;
+        TreeNode<T> parent;
 
         while (true)
         {
@@ -51,30 +49,38 @@ public class BST<T> : IBST<T> where T : IComparable<T>
     }
 }
 
-    private void Insert(T value, TreeNode<T>? node)
+   private void Insert(T value, TreeNode<T>? node)
 {
+    // case Root is null
     if (node == null)
     {
         Root = new TreeNode<T>(value);
         return;
     }
-    else if (value.CompareTo(node.Value) < 0)
+
+    // right child
+    if(value.CompareTo(node.Value) > 0)
     {
-        if (node.Left == null)
-        {
-            node.Left = new TreeNode<T>(value);
-            return;
-        }
-        Insert(value, node.Left);
-    }
-    else
-    {
-        if (node.Right == null)
+        if(node.Right == null)
         {
             node.Right = new TreeNode<T>(value);
-            return;
         }
-        Insert(value, node.Right);
+        else
+        {
+            Insert(value, node.Right);
+        }
+    }
+    // left child
+    else if(value.CompareTo(node.Value) < 0)
+    {
+        if(node.Left == null)
+        {
+            node.Left = new TreeNode<T>(value);
+        }
+        else
+        {
+            Insert(value, node.Left);
+        }
     }
 }
 
@@ -82,181 +88,195 @@ public class BST<T> : IBST<T> where T : IComparable<T>
 
     public string PreOrderTraversal() => PreOrderTraversal(Root);
     private string PreOrderTraversal(TreeNode<T>? currNode)
-{
-    if (currNode == null)
     {
-        return string.Empty;
+        if(currNode == null)
+        {
+            return string.Empty;
+        }
+        return currNode.Value + " " + PreOrderTraversal(currNode.Left) + PreOrderTraversal(currNode.Right);
     }
-    // Assuming `values` is a List<string> that contains your values
-    string actual = string.Join(" ", currNode).Trim();
-    return actual;
-}
 
     public string InOrderTraversal() => InOrderTraversal(Root);
     private string InOrderTraversal(TreeNode<T>? currNode)
-{
-    if (currNode == null)
     {
-        return string.Empty;
+        if(currNode == null)
+        {
+            return string.Empty;
+        }
+        return InOrderTraversal(currNode.Left) + currNode.Value + " " + InOrderTraversal(currNode.Right);        
     }
-    return InOrderTraversal(currNode.Left) + " " + currNode.Value.ToString() + " " + InOrderTraversal(currNode.Right);
-    
-}
 
     public string PostOrderTraversal() => PostOrderTraversal(Root);
     private string PostOrderTraversal(TreeNode<T>? currNode)
-{
-    if (currNode == null)
     {
-        return string.Empty;
+        if (currNode == null)
+        {
+            return String.Empty;
+        }
+        return PostOrderTraversal(currNode.Left) + PostOrderTraversal(currNode.Right) + " " + currNode.Value;    
+        
+
     }
-    return PostOrderTraversal(currNode.Left) + " " + PostOrderTraversal(currNode.Right) + " " + currNode.Value.ToString();
-}
     #endregion
 
-    public bool Contains(T value) => Search(Root, value) != null; 
+    public bool Contains(T value) => Search(Root, value) != null;
 
     private TreeNode<T> Search(TreeNode<T>? node, T value)
-{
-    if (node == null)
     {
+        // node does not exist
+        if (node == null)
+        {
+            return null;
+        }
+        
+        // value in the node is the same we are looking for
+        if (node.Value.CompareTo(value) == 0)
+        {
+            return node;
+        }
+
+        // value in the node is smaller than the one we are looking for
+        if(node.Value.CompareTo(value) < 0)
+        {
+            return Search(node.Right, value);
+        }
+ 
+        // value in the node is bigger than the one we are looking for
+        if(node.Value.CompareTo(value) > 0)
+        {
+            return Search(node.Left, value);
+        }
+
         return null;
+
     }
-    if (value.CompareTo(node.Value) == 0)
-    {
-        return null; // Return null instead of the node itself to exclude duplicate values
-    }
-    else if (value.CompareTo(node.Value) < 0)
-    {
-        return Search(node.Left, value);
-    }
-    else
-    {
-        return Search(node.Right, value);
-    }
-}
 
     #region  Remove Delete
 
     public bool Remove(T value) => DeleteValue(this, value);
 
     private bool DeleteValue(BST<T>? tree, T value)
-{
-
-    if (tree.Root.Value.CompareTo(value) == 0)
     {
-        // Special case: root to delete
-        if (tree.Root.Left == null && tree.Root.Right == null)
+        if (tree == null)
         {
-            // No children
-            tree.Root = null;
+            return false;
         }
-        else if (tree.Root.Left != null && tree.Root.Right == null)
+        // special case if the value to delete is in the root (and the root has 0 children or 1 child)
+        if (Root.Value.CompareTo(value) == 0)
         {
-            // Only left child
-            tree.Root = tree.Root.Left;
-        }
-        else if (tree.Root.Left == null && tree.Root.Right != null)
-        {
-            // Only right child
-            tree.Root = tree.Root.Right;
-        }
-        else
-        {
-            // Two children
-            TreeNode<T> inOrderSucc = findInOrderSucc(tree.Root);
-            tree.Root.Value = inOrderSucc.Value;
-            delete(tree.Root, inOrderSucc);
-        }
-        return true;
-    }
-    else
-    {
-        // Find the node to delete and its parent
-        TreeNode<T> parent = null;
-        TreeNode<T> current = tree.Root;
-        while (current != null)
-        {
-            if (value.CompareTo(current.Value) < 0)
+            if (Root.Left == null && Root.Right == null)
             {
-                parent = current;
-                current = current.Left;
+                Root = null;
+                return true;
             }
-            else if (value.CompareTo(current.Value) > 0)
+            if (Root.Left == null)
             {
-                parent = current;
-                current = current.Right;
+                Root = Root.Right;
+                return true;
             }
-            else
+            if (Root.Right == null)
             {
-                break;
+                Root = Root.Left;
+                return true;
             }
         }
 
-        if (current == null)
+        // there are no children:
+        if(Root.Left == null && Root.Right == null)
         {
-            // Node to delete not found
+            Root = null;
+            return true;
+        }
+
+        // there is only left child, the right does not exist
+        if (Root.Left != null && Root.Right == null)
+        {
+            Root = Root.Left;
+            return true;
+        }
+
+        // there is only right child, the left does not exist
+        if (Root.Right != null && Root.Left == null)
+        {
+            Root = Root.Right;
+            return true;
+        }
+
+
+        // all other cases. Find first the node corresponding to the value we want to delete
+        TreeNode<T>? nodeToDelete = Search(Root, value);
+        if (nodeToDelete == null)
+        {
             return false;
         }
 
-        // Delete the node
-        return delete(parent, current);
-    }
-}
+        // actually perform the deletion
+        delete(nodeToDelete);
+        return true;
 
-    private bool delete(TreeNode<T>? parent, TreeNode<T> nodeToDelete)
-{
-    if (nodeToDelete.Left == null && nodeToDelete.Right == null)
+    }
+
+    private bool delete(TreeNode<T> nodeToDelete)
     {
         // CASE 1 : LEAF
-        if (isLeft(nodeToDelete, parent))
+        if (nodeToDelete.Right == null && nodeToDelete.Left == null)
         {
-            parent.Left = null;
+            if (isLeft(nodeToDelete, nodeToDelete.Parent))
+            {
+                nodeToDelete.Parent.Left = null;
+            }
+            else
+            {
+                nodeToDelete.Parent.Right = null;
+            }
+            return true;
         }
-        else
-        {
-            parent.Right = null;
-        }
-    }
-    else if (nodeToDelete.Left != null && nodeToDelete.Right == null)
-    {
+
         // CASE 2 : ONE CHILD
-        if (isLeft(nodeToDelete, parent))
+        if (nodeToDelete.Right == null || nodeToDelete.Left == null)
         {
-            parent.Left = nodeToDelete.Left;
+            if (nodeToDelete.Right != null)
+            {
+                if (isLeft(nodeToDelete, nodeToDelete.Parent))
+                {
+                    nodeToDelete.Parent.Left = nodeToDelete.Right;
+                }
+                else
+                {
+                    nodeToDelete.Parent.Right = nodeToDelete.Right;
+                }
+            }
+            else
+            {
+                if (isLeft(nodeToDelete, nodeToDelete.Parent))
+                {
+                    nodeToDelete.Parent.Left = nodeToDelete.Left;
+                }
+                else
+                {
+                    nodeToDelete.Parent.Right = nodeToDelete.Left;
+                }
+            }
+            return true;
         }
-        else
-        {
-            parent.Right = nodeToDelete.Left;
-        }
-    }
-    else if (nodeToDelete.Left == null && nodeToDelete.Right != null)
-    {
-        // CASE 2 : ONE CHILD
-        if (isLeft(nodeToDelete, parent))
-        {
-            parent.Left = nodeToDelete.Right;
-        }
-        else
-        {
-            parent.Right = nodeToDelete.Right;
-        }
-    }
-    else
-    {
+
         // CASE 3 : TWO CHILDREN
+        if(nodeToDelete.Right != null && nodeToDelete.Left != null)
+        {
+            TreeNode<T>? inOrderSucc = findInOrderSucc(nodeToDelete);
+            nodeToDelete.Value = inOrderSucc.Value;
+            delete(inOrderSucc);
+            return true;
+        }
+
         // find inordersucc == smallest element of right subtree
-        TreeNode<T> inOrderSucc = findInOrderSucc(nodeToDelete);
 
         // copy value to nodeToDelete
-        nodeToDelete.Value = inOrderSucc.Value;
 
-        // call recursively delete on inordersucc
-        return delete(nodeToDelete, inOrderSucc);
+        // call recursively delete on inordersucc 
+return false;
+
     }
-
-    return true;
-}
 
     // This methods finds the in order successor of the node given as parameter
     private TreeNode<T>? findInOrderSucc(TreeNode<T> node)

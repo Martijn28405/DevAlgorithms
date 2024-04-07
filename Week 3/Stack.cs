@@ -1,36 +1,34 @@
-﻿using System.Collections;
-
-namespace Solution;
-
-public class Stack<T> : IStack<T>
+﻿public class Stack<T> : SimpleStack<T>
 {
-    public bool Empty => Count == 0;
-
-    public bool Full => Count == Size;
-
-    public int Count => Count;
-
-    public int Size => Size;
-
-    public Stack(int size = 4)
+    public override void Push(T item)
     {
-        Stack<T> stack = new Stack<T>(size);
+        if (top == Capacity - 1)
+        {
+            Capacity *= 2;
+            T?[] newArr = new T[Capacity];
+            for (int i = 0; i <= top; i++)
+            {
+                newArr[i] = arr[i];
+            }
+            arr = newArr;
+        }
+        arr[++top] = item;
     }
 
-    public T? Peek()
+    public override T? Peek()
     {
-        throw new NotImplementedException();
+        if (IsEmpty())
+            throw new StackEmptyException("The Stack is empty.");
+        return arr[top];
     }
-
-    public T? Pop()
+    
+    public override T? Pop()
     {
-        Stack<T> stack = new Stack<T>();
-        return stack.Pop();
-    }
-
-    public void Push(T Item)
-    {
-        Stack<T> stack = new Stack<T>();
-        stack.Push(Item);
+        if (IsEmpty())
+            throw new StackEmptyException("The Stack is empty.");
+        T? temp = arr[top];
+        arr[top] = default(T);
+        top--;
+        return temp;
     }
 }
